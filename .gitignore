@@ -1,6 +1,5 @@
 .vs/*
 box/x64/*
 x64/*
-*.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
