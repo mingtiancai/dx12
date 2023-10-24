@@ -21,8 +21,8 @@
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
-// std::ostream &XM_CALLCONV operator<<(std::ostream &os, FXMVECTOR v);
-// std::ostream &XM_CALLCONV operator<<(std::ostream &os, FXMMATRIX m);
+std::ostream &XM_CALLCONV operator<<(std::ostream &os, FXMVECTOR v);
+std::ostream &XM_CALLCONV operator<<(std::ostream &os, FXMMATRIX m);
 
 class D3DApp {
 protected:

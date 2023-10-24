@@ -613,3 +613,23 @@ void D3DApp::LogOutputDisplayModes(IDXGIOutput *output, DXGI_FORMAT format) {
     ::OutputDebugString(text.c_str());
   }
 }
+
+std::ostream &XM_CALLCONV operator<<(std::ostream &os, FXMVECTOR v) {
+  XMFLOAT4 dest;
+  XMStoreFloat4(&dest, v);
+
+  os << std::left << std::setw(18) << dest.x << std::setw(18) << dest.y
+     << std::setw(18) << dest.z << std::setw(18) << dest.w;
+  return os;
+}
+
+std::ostream &XM_CALLCONV operator<<(std::ostream &os, FXMMATRIX m) {
+  for (int i = 0; i < 4; ++i) {
+    os << std::left << std::setw(18) << XMVectorGetX(m.r[i]);
+    os << std::left << std::setw(18) << XMVectorGetY(m.r[i]);
+    os << std::left << std::setw(18) << XMVectorGetZ(m.r[i]);
+    os << std::left << std::setw(18) << XMVectorGetW(m.r[i]);
+    os << std::endl;
+  }
+  return os;
+}
