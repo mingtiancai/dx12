@@ -12,6 +12,8 @@
 #include "../Common/UploadBuffer.h "
 #include "../Common/d3dApp.h"
 
+#include "test/test.h"
+
 #include <iostream>
 
 using Microsoft::WRL::ComPtr;
@@ -81,6 +83,7 @@ private:
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine,
                    int showCmd) {
+  tt();
   // Enable run-time memory check for debug builds.
 #if defined(DEBUG) | defined(_DEBUG)
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -93,6 +96,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine,
 
   std::cout << v << std::endl;
   std::cout << up << endl;
+
+  std::wstring ss = L"¸ãÄãÂé±Ô\n";
+  OutputDebugString(ss.c_str());
 
   try {
     BoxApp theApp(hInstance);

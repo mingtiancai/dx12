@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{16cc5c58-7c19-482e-844b-cd2b87f51835}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\include">
+      <UniqueIdentifier>{b49b0f34-cea5-4139-b901-ac13dfae5f64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\src">
+      <UniqueIdentifier>{9934298c-0ae8-4c6f-b0a4-cbe29f235cf2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -54,6 +63,9 @@
     <ClInclude Include="..\Common\UploadBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="test\test.h">
+      <Filter>test\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="box.cpp">
@@ -79,6 +91,9 @@
     </ClCompile>
     <ClCompile Include="..\Common\MathHelper.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\test.cpp">
+      <Filter>test\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
