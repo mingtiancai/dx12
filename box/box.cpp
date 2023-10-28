@@ -19,7 +19,9 @@
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
-using namespace std;
+
+using std::cout;
+using std::endl;
 
 struct Vertex {
   XMFLOAT3 Pos;
@@ -96,7 +98,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine,
   XMMATRIX v = XMMatrixLookAtLH(pos, target, up);
 
   std::cout << v << std::endl;
-  std::cout << up << endl;
+  std::cout << up << std::endl;
 
   std::wstring ss = L"¸ãÄãÂé±Ô\n";
   OutputDebugString(ss.c_str());
@@ -158,7 +160,7 @@ void BoxApp::Update(const GameTimer &gt) {
   float y = mRadius * sinf(mPhi) * sinf(mTheta);
   float z = mRadius * cosf(mPhi);
 
-  cout << "x: " << x << " y: " << y << " z: " << z << endl;
+  std::cout << "x: " << x << " y: " << y << " z: " << z << std::endl;
 
   // Build the view matrix.
   XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
