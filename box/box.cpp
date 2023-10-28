@@ -62,6 +62,7 @@ private:
   std::unique_ptr<UploadBuffer<ObjectConstants>> mObjectCB = nullptr;
 
   std::unique_ptr<MeshGeometry> mBoxGeo = nullptr;
+  std::unique_ptr<MeshGeometry> mCoordinateGeo = nullptr;
 
   ComPtr<ID3DBlob> mvsByteCode = nullptr;
   ComPtr<ID3DBlob> mpsByteCode = nullptr;
@@ -74,7 +75,7 @@ private:
   XMFLOAT4X4 mView = MathHelper::Identity4x4();
   XMFLOAT4X4 mProj = MathHelper::Identity4x4();
 
-  float mTheta = 1.5f * XM_PI;
+  float mTheta = 0.25f * XM_PI;
   float mPhi = XM_PIDIV4;
   float mRadius = 5.0f;
 
@@ -154,15 +155,19 @@ void BoxApp::OnResize() {
 void BoxApp::Update(const GameTimer &gt) {
   // Convert Spherical to Cartesian coordinates.
   float x = mRadius * sinf(mPhi) * cosf(mTheta);
-  float z = mRadius * sinf(mPhi) * sinf(mTheta);
-  float y = mRadius * cosf(mPhi);
+  float y = mRadius * sinf(mPhi) * sinf(mTheta);
+  float z = mRadius * cosf(mPhi);
+
+  cout << "x: " << x << " y: " << y << " z: " << z << endl;
 
   // Build the view matrix.
   XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
   XMVECTOR target = XMVectorZero();
-  XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+  XMVECTOR up = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 
   XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+
+  // cout << "view: " << endl << view << endl;
   XMStoreFloat4x4(&mView, view);
 
   XMMATRIX world = XMLoadFloat4x4(&mWorld);
@@ -218,12 +223,22 @@ void BoxApp::Draw(const GameTimer &gt) {
   auto x4 = mBoxGeo->IndexBufferView();
   mCommandList->IASetIndexBuffer(&x4);
   mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
   mCommandList->SetGraphicsRootDescriptorTable(
       0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
 
   mCommandList->DrawIndexedInstanced(mBoxGeo->DrawArgs["box"].IndexCount, 1, 0,
                                      0, 0);
+
+  auto x15 = mCoordinateGeo->VertexBufferView();
+  mCommandList->IASetVertexBuffers(0, 1, &x15);
+  auto x16 = mCoordinateGeo->IndexBufferView();
+  mCommandList->IASetIndexBuffer(&x16);
+  mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+  mCommandList->SetGraphicsRootDescriptorTable(
+      0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
+
+  mCommandList->DrawIndexedInstanced(
+      mCoordinateGeo->DrawArgs["coordinate"].IndexCount, 1, 0, 0, 0);
 
   // Indicate a state transition on the resource usage.
   auto x7 = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -269,8 +284,10 @@ void BoxApp::OnMouseMove(WPARAM btnState, int x, int y) {
     mTheta += dx;
     mPhi += dy;
 
+    cout << "mPhi: " << mPhi * 180 / 3.1415 << endl;
+
     // Restrict the angle mPhi.
-    mPhi = MathHelper::Clamp(mPhi, 0.1f, MathHelper::Pi - 0.1f);
+    mPhi = MathHelper::Clamp(mPhi, 0 + 0.001f, MathHelper::Pi - 0.001f);
   } else if ((btnState & MK_RBUTTON) != 0) {
     // Make each pixel correspond to 0.005 unit in the scene.
     float dx = 0.005f * static_cast<float>(x - mLastMousePos.x);
@@ -382,6 +399,15 @@ void BoxApp::BuildBoxGeometry() {
       Vertex({XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan)}),
       Vertex({XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta)})};
 
+  std::array<Vertex, 6> vertices2 = {
+
+      Vertex({XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(Colors::White)}),
+      Vertex({XMFLOAT3(+2.0f, 0.0f, 0.0f), XMFLOAT4(Colors::Red)}),
+      Vertex({XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(Colors::White)}),
+      Vertex({XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(Colors::Green)}),
+      Vertex({XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(Colors::White)}),
+      Vertex({XMFLOAT3(0.0f, 0.0f, 2.0f), XMFLOAT4(Colors::Blue)})};
+
   std::array<std::uint16_t, 36> indices = {// front face
                                            0, 1, 2, 0, 2, 3,
 
@@ -398,27 +424,23 @@ void BoxApp::BuildBoxGeometry() {
                                            1, 5, 6, 1, 6, 2,
 
                                            // bottom face
-                                           4, 0, 3, 4, 3, 7};
+                                           4, 0, 3, 4, 3, 7
 
-  // std::array<Vertex, 3> vertices = {
-  //     Vertex({XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White)}),
-  //     Vertex({XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Black)}),
-  //     Vertex({XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Red)}),
-  //     /*   Vertex({XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green)}),
-  //        Vertex({XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Blue)}),
-  //        Vertex({XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Yellow)}),
-  //        Vertex({XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan)}),
-  //        Vertex({XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta)})*/
-  // };
+  };
 
-  // std::array<std::uint16_t, 6> indices = {// front face
-  //                                         0, 1, 2, 0, 2, 1};
+  std::array<std::uint16_t, 9> indices2 = {0, 1, 0, 0, 3, 0, 0, 5, 0};
 
   const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
   const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
 
+  const UINT vbByteSize2 = (UINT)vertices2.size() * sizeof(Vertex);
+  const UINT ibByteSize2 = (UINT)indices2.size() * sizeof(std::uint16_t);
+
   mBoxGeo = std::make_unique<MeshGeometry>();
   mBoxGeo->Name = "boxGeo";
+
+  mCoordinateGeo = std::make_unique<MeshGeometry>();
+  mCoordinateGeo->Name = "coordinate";
 
   ThrowIfFailed(D3DCreateBlob(vbByteSize, &mBoxGeo->VertexBufferCPU));
   CopyMemory(mBoxGeo->VertexBufferCPU->GetBufferPointer(), vertices.data(),
@@ -428,6 +450,14 @@ void BoxApp::BuildBoxGeometry() {
   CopyMemory(mBoxGeo->IndexBufferCPU->GetBufferPointer(), indices.data(),
              ibByteSize);
 
+  ThrowIfFailed(D3DCreateBlob(vbByteSize2, &mCoordinateGeo->VertexBufferCPU));
+  CopyMemory(mCoordinateGeo->VertexBufferCPU->GetBufferPointer(),
+             vertices2.data(), vbByteSize2);
+
+  ThrowIfFailed(D3DCreateBlob(ibByteSize2, &mCoordinateGeo->IndexBufferCPU));
+  CopyMemory(mCoordinateGeo->IndexBufferCPU->GetBufferPointer(),
+             indices2.data(), ibByteSize2);
+
   mBoxGeo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(
       md3dDevice.Get(), mCommandList.Get(), vertices.data(), vbByteSize,
       mBoxGeo->VertexBufferUploader);
@@ -436,10 +466,23 @@ void BoxApp::BuildBoxGeometry() {
       md3dDevice.Get(), mCommandList.Get(), indices.data(), ibByteSize,
       mBoxGeo->IndexBufferUploader);
 
+  mCoordinateGeo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(
+      md3dDevice.Get(), mCommandList.Get(), vertices2.data(), vbByteSize2,
+      mCoordinateGeo->VertexBufferUploader);
+
+  mCoordinateGeo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(
+      md3dDevice.Get(), mCommandList.Get(), indices2.data(), ibByteSize2,
+      mCoordinateGeo->IndexBufferUploader);
+
   mBoxGeo->VertexByteStride = sizeof(Vertex);
   mBoxGeo->VertexBufferByteSize = vbByteSize;
   mBoxGeo->IndexFormat = DXGI_FORMAT_R16_UINT;
   mBoxGeo->IndexBufferByteSize = ibByteSize;
+
+  mCoordinateGeo->VertexByteStride = sizeof(Vertex);
+  mCoordinateGeo->VertexBufferByteSize = vbByteSize2;
+  mCoordinateGeo->IndexFormat = DXGI_FORMAT_R16_UINT;
+  mCoordinateGeo->IndexBufferByteSize = ibByteSize2;
 
   SubmeshGeometry submesh;
   submesh.IndexCount = (UINT)indices.size();
@@ -447,6 +490,13 @@ void BoxApp::BuildBoxGeometry() {
   submesh.BaseVertexLocation = 0;
 
   mBoxGeo->DrawArgs["box"] = submesh;
+
+  SubmeshGeometry submesh2;
+  submesh.IndexCount = (UINT)indices2.size();
+  submesh.StartIndexLocation = 0;
+  submesh.BaseVertexLocation = 0;
+
+  mCoordinateGeo->DrawArgs["coordinate"] = submesh;
 }
 
 void BoxApp::BuildPSO() {
