@@ -106,7 +106,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine,
   std::cout << v << std::endl;
   std::cout << up << std::endl;
 
-  std::wstring ss = L"¸ãÄãÂé±Ô\n";
+  std::wstring ss = L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\n";
   OutputDebugString(ss.c_str());
 
   try {

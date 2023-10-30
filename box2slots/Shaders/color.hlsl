@@ -28,8 +28,7 @@ VertexOut VS(VPosData vp, VColorData vc) {
   vout.PosH = mul(float4(vp.PosL, 1.0f), gWorldViewProj);
 
   // Just pass vertex color into the pixel shader.
-  vout.Color = vc.Color;
-
+  vout.Color = vc.Color * sin(2.0f * gTime) * 2.9;
   return vout;
 }
 // VertexOut VS(VertexIn vin)
@@ -45,4 +44,7 @@ VertexOut VS(VPosData vp, VColorData vc) {
 //    return vout;
 //}
 
-float4 PS(VertexOut pin) : SV_Target { return pin.Color; }
+float4 PS(VertexOut pin) : SV_Target {
+  clip(pin.Color.r - 0.01f);
+  return pin.Color;
+}
